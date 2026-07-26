@@ -20,10 +20,10 @@
     "@pulseflow/contracts": "1.0.1"
   },
   "devDependencies": {
-    "@types/node": "^24.0.0",
+    "@types/node": "^26.1.1",
     "@types/pg": "^8.15.5",
     "prisma": "7.9.0",
     "tsx": "^4.22.5",
-    "typescript": "^5.9.2"
+    "typescript": "^7.0.2"
   }
 }
