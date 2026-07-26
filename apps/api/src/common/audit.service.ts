@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { AuthTokenPayload } from '@pulseflow/contracts';
+import type { Prisma } from '@pulseflow/database';
 import type { AuthenticatedRequest } from './authenticated-request';
 import { InfrastructureService } from '../infrastructure/infrastructure.service';
 
@@ -23,7 +24,7 @@ export class AuditService {
         actorId: input.actor?.sub,
         ipAddress: input.request?.ip,
         userAgent: input.request?.header('user-agent')?.slice(0, 300),
-        metadata: input.metadata,
+        metadata: input.metadata as unknown as Prisma.InputJsonObject | undefined,
       },
     });
   }

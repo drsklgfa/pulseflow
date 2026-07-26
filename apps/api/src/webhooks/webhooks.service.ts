@@ -9,6 +9,7 @@ import {
   type PaymentState,
 } from '@pulseflow/contracts';
 import { PaymentStatus, TimelineEventType } from '@pulseflow/database';
+import type { Prisma } from '@pulseflow/database';
 import { InfrastructureService } from '../infrastructure/infrastructure.service';
 import { NotificationsService } from '../notifications/notifications.service';
 
@@ -18,7 +19,7 @@ interface NormalizedWebhook {
   paymentId?: string;
   externalPaymentId?: string;
   status?: PaymentStatus;
-  payload: Record<string, unknown>;
+  payload: Prisma.InputJsonObject;
 }
 
 @Injectable()
@@ -64,7 +65,7 @@ export class WebhooksService {
           provider: normalizedProvider,
           eventType: event.eventType,
           signatureValid: false,
-          payload,
+          payload: payload as Prisma.InputJsonValue,
           processingError: 'Signature validation failed.',
           paymentId: matchingPaymentId,
         },
@@ -103,7 +104,7 @@ export class WebhooksService {
           provider: normalizedProvider,
           eventType: event.eventType,
           signatureValid: true,
-          payload,
+          payload: payload as Prisma.InputJsonValue,
           processedAt: new Date(),
           processingError: 'No matching PulseFlow payment was found.',
         },
@@ -122,7 +123,7 @@ export class WebhooksService {
           provider: normalizedProvider,
           eventType: event.eventType,
           signatureValid: true,
-          payload,
+          payload: payload as Prisma.InputJsonValue,
           processedAt: new Date(),
           paymentId: payment.id,
         },
@@ -229,13 +230,13 @@ export class WebhooksService {
     return { status: 'unexpectedly_accepted', paymentId };
   }
 
-  private parse(rawBody: Buffer): Record<string, unknown> {
+  private parse(rawBody: Buffer): Prisma.InputJsonObject {
     try {
       const parsed = JSON.parse(rawBody.toString('utf8')) as unknown;
       if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
         throw new Error('Webhook body must be a JSON object.');
       }
-      return parsed as Record<string, unknown>;
+      return parsed as Prisma.InputJsonObject;
     } catch {
       throw new UnauthorizedException('Webhook payload is not valid JSON.');
     }
@@ -261,11 +262,11 @@ export class WebhooksService {
     );
   }
 
-  private normalize(provider: string, payload: Record<string, unknown>): NormalizedWebhook {
+  private normalize(provider: string, payload: Prisma.InputJsonObject): NormalizedWebhook {
     if (provider === 'stripe') {
-      const data = payload.data as { object?: Record<string, unknown> } | undefined;
+      const data = payload.data as { object?: Prisma.InputJsonObject } | undefined;
       const object = data?.object ?? {};
-      const metadata = (object.metadata ?? {}) as Record<string, unknown>;
+      const metadata = (object.metadata ?? {}) as Prisma.InputJsonObject;
       const type = String(payload.type ?? 'stripe.unknown');
       const status =
         type === 'payment_intent.succeeded'
@@ -284,7 +285,7 @@ export class WebhooksService {
         payload,
       };
     }
-    const data = (payload.data ?? {}) as Record<string, unknown>;
+    const data = (payload.data ?? {}) as Prisma.InputJsonObject;
     const statusValue = String(data.status ?? '').toUpperCase();
     const status = Object.values(PaymentStatus).includes(statusValue as PaymentStatus)
       ? (statusValue as PaymentStatus)
