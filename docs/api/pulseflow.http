@@ -1,0 +1,56 @@
+@baseUrl = http://localhost:3333/api/v1
+@token = paste-access-token-here
+@paymentId = paste-payment-id-here
+
+### Readiness
+GET {{baseUrl}}/health/ready
+
+### Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@pulseflow.local",
+  "password": "PulseFlow123!"
+}
+
+### Dashboard
+GET {{baseUrl}}/dashboard
+Authorization: Bearer {{token}}
+
+### Create payment
+POST {{baseUrl}}/payments
+Authorization: Bearer {{token}}
+Idempotency-Key: portfolio-request-001
+Content-Type: application/json
+
+{
+  "customerName": "Marina Costa",
+  "customerEmail": "marina@example.com",
+  "amount": 129.90,
+  "currency": "BRL"
+}
+
+### Simulate successful approval
+POST {{baseUrl}}/lab/payments/{{paymentId}}/event
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "APPROVED",
+  "failureMode": "NONE"
+}
+
+### Simulate transient worker failure
+POST {{baseUrl}}/lab/payments/{{paymentId}}/event
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "APPROVED",
+  "failureMode": "FAIL_ONCE"
+}
+
+### Simulate invalid signature
+POST {{baseUrl}}/lab/payments/{{paymentId}}/invalid-signature
+Authorization: Bearer {{token}}

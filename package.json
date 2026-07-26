@@ -1,0 +1,46 @@
+{
+  "name": "pulseflow",
+  "version": "1.0.1",
+  "description": "Production-minded payment, webhook, queue and notification orchestration portfolio project.",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=24.0.0",
+    "npm": ">=11.0.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build:shared && npm run build -w @pulseflow/api && npm run build -w @pulseflow/worker && npm run build -w @pulseflow/web",
+    "dev:api": "npm run dev -w @pulseflow/api",
+    "dev:worker": "npm run dev -w @pulseflow/worker",
+    "dev:web": "npm run dev -w @pulseflow/web",
+    "test": "npm run build:shared && npm run test -ws --if-present",
+    "test:integration": "npm run build:shared && npm run test:integration -w @pulseflow/api",
+    "test:coverage": "npm run build:shared && npm run test:coverage -ws --if-present",
+    "typecheck": "npm run build:shared && npm run typecheck -ws --if-present",
+    "lint": "npm run typecheck",
+    "quality": "npm run format:check && npm run typecheck && npm test && npm run build && npm run validate:repo",
+    "format:check": "prettier --check .",
+    "format": "prettier --write .",
+    "prisma:generate": "npm run prisma:generate -w @pulseflow/database",
+    "prisma:migrate": "npm run prisma:migrate -w @pulseflow/database",
+    "prisma:deploy": "npm run prisma:deploy -w @pulseflow/database",
+    "prisma:seed": "npm run build:shared && npm run prisma:seed -w @pulseflow/database",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down",
+    "docker:reset": "docker compose down -v --remove-orphans",
+    "validate:repo": "python3 scripts/validate_repository.py",
+    "manifest": "python3 scripts/create_manifest.py",
+    "build:shared": "npm run prisma:generate && npm run build -w @pulseflow/contracts && npm run build -w @pulseflow/database",
+    "manifest:verify": "python3 scripts/verify_manifest.py"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.1.10",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2",
+    "vitest": "^4.1.10"
+  }
+}

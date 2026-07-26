@@ -1,0 +1,154 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum PaymentStatus {
+  PENDING
+  APPROVED
+  DECLINED
+  CANCELLED
+}
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+  WEBHOOK
+}
+
+enum NotificationStatus {
+  PENDING
+  PROCESSING
+  SENT
+  FAILED
+}
+
+enum TimelineEventType {
+  PAYMENT_CREATED
+  PAYMENT_UPDATED
+  WEBHOOK_RECEIVED
+  WEBHOOK_REJECTED
+  JOB_QUEUED
+  JOB_STARTED
+  NOTIFICATION_SENT
+  JOB_FAILED
+  JOB_RETRIED
+}
+
+enum UserRole {
+  ADMIN
+  VIEWER
+}
+
+model User {
+  id           String     @id @default(uuid())
+  email        String     @unique
+  name         String
+  passwordHash String
+  role         UserRole   @default(VIEWER)
+  active       Boolean    @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  auditLogs    AuditLog[]
+
+  @@index([role, active])
+}
+
+model Payment {
+  id             String            @id @default(uuid())
+  externalId     String?           @unique
+  idempotencyKey String            @unique
+  customerName   String
+  customerEmail  String
+  amount         Int
+  currency       String            @default("BRL")
+  status         PaymentStatus     @default(PENDING)
+  provider       String            @default("mock")
+  metadata       Json?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  notifications  Notification[]
+  webhookEvents  WebhookEvent[]
+  timeline       ProcessingEvent[]
+
+  @@index([status, createdAt])
+  @@index([customerEmail])
+  @@index([provider, createdAt])
+}
+
+model WebhookEvent {
+  id              String    @id @default(uuid())
+  externalEventId String    @unique
+  provider        String    @default("mock")
+  eventType       String
+  signatureValid  Boolean   @default(true)
+  payload         Json
+  processingError String?
+  processedAt     DateTime?
+  receivedAt      DateTime  @default(now())
+  paymentId       String?
+  payment         Payment?  @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
+  @@index([provider, eventType, receivedAt])
+  @@index([paymentId, receivedAt])
+}
+
+model Notification {
+  id          String             @id @default(uuid())
+  paymentId   String
+  channel     NotificationChannel
+  status      NotificationStatus @default(PENDING)
+  recipient   String
+  template    String
+  attempts    Int                @default(0)
+  maxAttempts Int                @default(4)
+  queueJobId  String?            @unique
+  lastError   String?
+  metadata    Json?
+  sentAt      DateTime?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  payment     Payment            @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@index([channel, createdAt])
+}
+
+model ProcessingEvent {
+  id            String            @id @default(uuid())
+  paymentId     String
+  type          TimelineEventType
+  title         String
+  description   String
+  correlationId String
+  metadata      Json?
+  createdAt     DateTime          @default(now())
+  payment       Payment           @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@index([paymentId, createdAt])
+  @@index([correlationId])
+  @@index([type, createdAt])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  actorId    String?
+  action     String
+  resource   String
+  resourceId String?
+  ipAddress  String?
+  userAgent  String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+  actor      User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([actorId, createdAt])
+  @@index([resource, resourceId])
+  @@index([action, createdAt])
+}

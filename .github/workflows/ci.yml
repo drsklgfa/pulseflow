@@ -1,0 +1,105 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  DATABASE_URL: postgresql://pulseflow:pulseflow@localhost:5432/pulseflow_test?schema=public
+  REDIS_URL: redis://localhost:6379
+  APP_MODE: test
+  NODE_ENV: test
+  PAYMENT_PROVIDER: mock
+  NOTIFICATION_PROVIDER: mock
+  AUTH_SECRET: integration-auth-secret-at-least-32-characters
+  WEBHOOK_SECRET: integration-webhook-secret
+  BOOTSTRAP_ADMIN_EMAIL: admin@pulseflow.local
+  BOOTSTRAP_ADMIN_PASSWORD: PulseFlow123!
+
+permissions:
+  contents: read
+
+jobs:
+  validate-and-test:
+    name: Validate, test and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: pulseflow_test
+          POSTGRES_USER: pulseflow
+          POSTGRES_PASSWORD: pulseflow
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U pulseflow -d pulseflow_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Validate repository structure
+        run: npm run validate:repo
+
+      - name: Build shared contracts and database client
+        run: npm run build:shared
+
+      - name: Apply database migrations
+        run: npm run prisma:deploy
+
+      - name: Seed integration database
+        run: npm run prisma:seed
+
+      - name: Type-check all workspaces
+        run: npm run typecheck
+
+      - name: Run unit tests with coverage
+        run: npm run test:coverage
+
+      - name: Run API integration tests
+        run: npm run test:integration
+        env:
+          RUN_INTEGRATION: "true"
+
+      - name: Build all applications
+        run: npm run build
+
+      - name: Validate Docker Compose
+        run: docker compose config --quiet
+
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pulseflow-coverage
+          path: |
+            apps/*/coverage
+            packages/*/coverage
+          if-no-files-found: ignore
+          retention-days: 14

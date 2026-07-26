@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="620" viewBox="0 0 1440 620" role="img" aria-labelledby="title desc">
+  <title id="title">PulseFlow product cover</title>
+  <desc id="desc">Dark product cover showing payment, webhook, queue and notification orchestration.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#07111f"/><stop offset="1" stop-color="#111a31"/></linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#62e7ff"/><stop offset="1" stop-color="#8b7cff"/></linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="45"/></filter>
+  </defs>
+  <rect width="1440" height="620" rx="28" fill="url(#bg)"/>
+  <circle cx="1150" cy="120" r="210" fill="#3d6cff" opacity=".18" filter="url(#glow)"/>
+  <circle cx="330" cy="540" r="180" fill="#18d8c7" opacity=".12" filter="url(#glow)"/>
+  <g transform="translate(92 85)">
+    <rect width="58" height="58" rx="17" fill="url(#accent)"/>
+    <path d="M15 31h8l5-15 8 28 6-13h7" fill="none" stroke="#07111f" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="78" y="41" fill="#f4f7ff" font-family="Inter,Segoe UI,sans-serif" font-size="38" font-weight="750">PulseFlow</text>
+    <text x="0" y="126" fill="#f4f7ff" font-family="Inter,Segoe UI,sans-serif" font-size="62" font-weight="760">Event-driven payments,</text>
+    <text x="0" y="198" fill="url(#accent)" font-family="Inter,Segoe UI,sans-serif" font-size="62" font-weight="760">without the black box.</text>
+    <text x="0" y="250" fill="#9eb0ca" font-family="Inter,Segoe UI,sans-serif" font-size="24">Signed webhooks · BullMQ retries · Dead-letter recovery · Realtime operations</text>
+    <g transform="translate(0 303)" font-family="Inter,Segoe UI,sans-serif">
+      <rect width="202" height="52" rx="16" fill="#dffbff"/><text x="26" y="34" fill="#07111f" font-size="18" font-weight="700">Interactive demo</text>
+      <rect x="218" width="195" height="52" rx="16" fill="#121f35" stroke="#33435f"/><text x="244" y="34" fill="#d8e5f8" font-size="18" font-weight="650">One-command Docker</text>
+    </g>
+    <g transform="translate(0 400)" font-family="Inter,Segoe UI,sans-serif">
+      <text y="18" fill="#6f83a1" font-size="15" font-weight="700" letter-spacing="2">PORTFOLIO SYSTEM</text>
+      <text y="52" fill="#b5c3d8" font-size="18">NestJS · React · PostgreSQL · Redis · Prisma · Docker · GitHub Actions</text>
+    </g>
+  </g>
+  <g transform="translate(940 188)" font-family="Inter,Segoe UI,sans-serif">
+    <rect width="408" height="330" rx="28" fill="#0d182b" stroke="#263653"/>
+    <text x="28" y="42" fill="#dce8f9" font-size="16" font-weight="700">LIVE ORCHESTRATION</text>
+    <g transform="translate(28 70)">
+      <rect width="352" height="58" rx="15" fill="#13233a"/><circle cx="26" cy="29" r="10" fill="#55e6b3"/><text x="48" y="25" fill="#ecf5ff" font-size="15" font-weight="700">Payment approved</text><text x="48" y="43" fill="#7f93b1" font-size="12">HMAC signature accepted</text><text x="300" y="34" fill="#7f93b1" font-size="12">12 ms</text>
+      <rect y="72" width="352" height="58" rx="15" fill="#13233a"/><circle cx="26" cy="101" r="10" fill="#69d7ff"/><text x="48" y="97" fill="#ecf5ff" font-size="15" font-weight="700">Job queued</text><text x="48" y="115" fill="#7f93b1" font-size="12">BullMQ · attempt 1 of 4</text><text x="300" y="106" fill="#7f93b1" font-size="12">31 ms</text>
+      <rect y="144" width="352" height="58" rx="15" fill="#13233a"/><circle cx="26" cy="173" r="10" fill="#9b8cff"/><text x="48" y="169" fill="#ecf5ff" font-size="15" font-weight="700">Notification delivered</text><text x="48" y="187" fill="#7f93b1" font-size="12">SMTP adapter · idempotent</text><text x="296" y="178" fill="#7f93b1" font-size="12">340 ms</text>
+    </g>
+    <rect x="28" y="288" width="352" height="1" fill="#243651"/>
+    <circle cx="39" cy="310" r="5" fill="#55e6b3"/><text x="52" y="316" fill="#88a0bf" font-size="13">API, Redis and PostgreSQL healthy</text>
+  </g>
+</svg>
